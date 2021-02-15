@@ -14,13 +14,14 @@ contract DeferredEquityPlan {
     uint fakenow = now;
 
     // Set the `unlock_time` to be 365 days from now
-    uint unlock_time = start_time + 365 days;
+    uint unlock_time;
 
-    uint public distributed_shares = 0; // starts at 0
+    uint public distributed_shares; // starts at 0
 
     constructor(address payable _employee) public {
         human_resources = msg.sender;
         employee = _employee;
+        distributed_shares = 0;
     }
     
     function fastforward() public {
@@ -48,6 +49,7 @@ contract DeferredEquityPlan {
         // double check in case the employee does not cash out until after 5+ years
         if (distributed_shares > total_shares) {
             distributed_shares = total_shares;
+            active = false;
         }
     }
 
