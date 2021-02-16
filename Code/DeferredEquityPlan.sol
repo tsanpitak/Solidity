@@ -11,43 +11,39 @@ contract DeferredEquityPlan {
     uint total_shares = 1000; // initial grant 1000 shares
 
     uint start_time = now; // permanently store the time this contract was initialized
-    uint fakenow = now;
+    //uint public fakenow = now;
 
     // Set the `unlock_time` to be 365 days from now
-    uint unlock_time;
+    uint unlock_time = now + 365 days;
 
-    uint public distributed_shares; // starts at 0
+    uint distributed_shares = 0; // starts at 0
 
     constructor(address payable _employee) public {
         human_resources = msg.sender;
         employee = _employee;
         distributed_shares = 0;
     }
-    
+    /*
     function fastforward() public {
-        fakenow += 100 days;
+        fakenow += 366 days;
     }
-    
+    */
     function distribute() public {
         require(msg.sender == human_resources || msg.sender == employee, "You are not authorized to execute this contract.");
         require(active == true, "Contract not active.");
 
-        // Add "require" statements to enforce that:
-        // 1: `unlock_time` is less than or equal to `now`
-        // 2: `distributed_shares` is less than the `total_shares`
-        // require(unlock_time < now && distributed_shares < total_shares, "All shares are distributed")
-        require(unlock_time < fakenow && distributed_shares < total_shares, "All shares are distributed");
+        require(unlock_time < now && distributed_shares < total_shares, "All shares are distributed");
+        // require(unlock_time < fakenow && distributed_shares < total_shares, "All shares are distributed");
 
-        // Add 365 days to the `unlock_time`
-        // unlock_time = now + 365 days;
-        unlock_time = fakenow + 365 days;
 
-        // Calculate the shares distributed by using the function (now - start_time) / 365 days * the annual distribution
-        // distributed_shares = (now - start_time) / 365 * (total_shares / 4);
-        distributed_shares = (fakenow - start_time) / 365 * (total_shares / 4);
+        distributed_shares = (now - start_time) / (365 * 24 * 60 * 60) * (total_shares / 4);
+        // distributed_shares = (fakenow - start_time) / (365 * 24 * 60 * 60) * (total_shares / 4);
+        
+        unlock_time = now + 365 days;
+        // unlock_time = fakenow + 365 days;
 
         // double check in case the employee does not cash out until after 5+ years
-        if (distributed_shares > total_shares) {
+        if (distributed_shares >= total_shares) {
             distributed_shares = total_shares;
             active = false;
         }
